@@ -1,0 +1,31 @@
+if (isset($_POST['submit'])) {
+  $ekspresi = $_POST['ekspresi'];
+  $hasil = $kalkulator->hitung($ekspresi);
+}
+
+
+if (isset($_POST['submit'])) {
+  $ekspresi = $_POST['ekspresi'];
+  $ekspresi = str_replace('x', '*', $ekspresi); // Mengganti huruf x dengan operator perkalian
+  $ekspresi = str_replace('÷', '/', $ekspresi); // Mengganti titik dua dengan operator pembagian
+  $ekspresi = str_replace('π', $kalkulator->phi(), $ekspresi); // Mengganti simbol pi dengan nilai phi
+
+  // Menangani ekspresi yang mengandung akar
+  if (strpos($ekspresi, '√') !== false) {
+    $pattern = '/√(\d+(\.\d+)?)/'; // Memperbarui pola untuk mendukung bilangan desimal
+    $ekspresi = preg_replace_callback($pattern, function($matches) {
+      return sqrt(floatval($matches[1])); // Menggunakan fungsi sqrt langsung untuk menghitung akar
+    }, $ekspresi);
+    $hasil = $ekspresi; // Langsung menetapkan hasil karena eval tidak digunakan
+  } else {
+    // Jika tidak ada akar, gunakan fungsi hitung dari kelas Kalkulator
+    if (in_array(substr($ekspresi, -1), ['+', '-', '*', '/'])) {
+      $ekspresi = substr($ekspresi, 0, -1);
+    }
+    if (strpos($ekspresi, '(') !== false && substr($ekspresi, -1) !== ')') {
+      $ekspresi .= ')';
+    }
+    $ekspresi = preg_replace('/(?<=[0-9])(\()/i', '*$1', $ekspresi);
+    $hasil = $kalkulator->hitung($ekspresi);
+  }
+}
